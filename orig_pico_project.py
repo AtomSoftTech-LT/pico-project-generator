@@ -1,4 +1,6 @@
+#!/usr/bin/env python3
 
+#
 # Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -20,10 +22,8 @@ from tkinter import filedialog as fd
 from tkinter import simpledialog as sd
 from tkinter import ttk
 
-COMPILER_FOLDER='C:\\VSARM\\armcc\\bin\\'
-
 CMAKELIST_FILENAME='CMakeLists.txt'
-COMPILER_NAME=COMPILER_FOLDER+'arm-none-eabi-gcc.exe'
+COMPILER_NAME='arm-none-eabi-gcc'
 
 VSCODE_LAUNCH_FILENAME = 'launch.json'
 VSCODE_C_PROPERTIES_FILENAME = 'c_cpp_properties.json'
@@ -291,9 +291,6 @@ class ChecklistBox(tk.Frame):
 import threading
 
 def thread_function(text, command, ok):
-    #print(text)
-    #print(command)
-    #print(text)
     l = shlex.split(command)
     proc = subprocess.Popen(l, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     for line in iter(proc.stdout.readline,''):
@@ -652,7 +649,6 @@ class ProjectWindow(tk.Frame):
         self.wantUSB = tk.IntVar()
         self.wantUSB.set(args.usb)
         ttk.Checkbutton(ooptionsSubframe, text="Console over USB (Disables other USB use)", variable=self.wantUSB).grid(row=0, column=1, padx=4, sticky=tk.W)
-        
 
         optionsRow += 2
 
@@ -814,9 +810,9 @@ def ParseCommandLine():
     parser.add_argument("-g", "--gui", action='store_true', help="Run a GUI version of the project generator")
     parser.add_argument("-p", "--project", action='append', help="Generate projects files for IDE. Options are: vscode")
     parser.add_argument("-r", "--runFromRAM", action='store_true', help="Run the program from RAM rather than flash")
-    parser.add_argument("-uart", "--uart", action='store_true', default=0, help="Console output to UART (default)")
+    parser.add_argument("-uart", "--uart", action='store_true', default=1, help="Console output to UART (default)")
     parser.add_argument("-nouart", "--nouart", action='store_true', default=0, help="Disable console output to UART")
-    parser.add_argument("-usb", "--usb", action='store_true', default=1,help="Console output to USB (disables other USB functionality")
+    parser.add_argument("-usb", "--usb", action='store_true', help="Console output to USB (disables other USB functionality")
     parser.add_argument("-cpp", "--cpp", action='store_true', default=0, help="Generate C++ code")
     parser.add_argument("-cpprtti", "--cpprtti", action='store_true', default=0, help="Enable C++ RTTI (Uses more memory)")
     parser.add_argument("-cppex", "--cppexceptions", action='store_true', default=0, help="Enable C++ exceptions (Uses more memory)")
@@ -878,9 +874,7 @@ def GenerateMain(folder, projectName, features, cpp):
             main += '\n'
 
     main += ('    puts("Hello, world!");\n\n'
-             '    while(1){\n'
-             '        \n'
-             '    }\n'
+             '    return 0;\n'
              '}\n'
             )
 
@@ -1041,7 +1035,7 @@ def generateProjectFiles(projectPath, projectName, sdkPath, projects, debugger):
                   '        "${env:PICO_SDK_PATH}/**"\n'
                   '      ],\n'
                   '      "defines": [],\n'
-                  '      "compilerPath": "C:\\VSARM\\armcc\\bin\\arm-none-eabi-gcc",\n'
+                  '      "compilerPath": "/usr/bin/arm-none-eabi-gcc",\n'
                   '      "cStandard": "gnu17",\n'
                   '      "cppStandard": "gnu++14",\n'
                   '      "intelliSenseMode": "linux-gcc-arm",\n'
@@ -1181,8 +1175,7 @@ def DoEverything(parent, params):
         cpus = 1
 
     if isWindows:
-        #cmakeCmd = 'cmake -DCMAKE_BUILD_TYPE=Debug -G "NMake Makefiles" ..'
-        cmakeCmd = 'cmake -DCMAKE_BUILD_TYPE=Debug -G "NMake MinGW" ..'
+        cmakeCmd = 'cmake -DCMAKE_BUILD_TYPE=Debug -G "NMake Makefiles" ..'
         makeCmd = 'nmake '
     else:
         cmakeCmd = 'cmake -DCMAKE_BUILD_TYPE=Debug ..'
